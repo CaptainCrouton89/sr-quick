@@ -2,7 +2,13 @@
 
 A collection of hooks and shit to make it easier to run a basic redux react project.
 
-To install:
+## Install
+
+`npm i sr-quick`
+
+## Local Install
+
+To install dev version:
 
 1. clone
 2. open folder
