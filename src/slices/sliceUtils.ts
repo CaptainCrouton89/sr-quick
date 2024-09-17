@@ -1,14 +1,18 @@
 // Purpose: create utility functions used by other slices
 import {
+  AsyncThunk,
   CreateSliceOptions,
   PayloadAction,
   Slice,
   SliceCaseReducers,
   SliceSelectors,
   UnknownAction,
+  createAsyncThunk,
   createSlice,
+  current,
 } from "@reduxjs/toolkit";
 import { AxiosError } from "axios";
+import { cloneDeep, merge } from "lodash";
 
 export function isPendingAction(sliceName: string) {
   return (action: UnknownAction): action is PayloadAction =>
@@ -87,3 +91,61 @@ export function createSliceWithDefaults<
     },
   });
 }
+
+export const optimisticThunk = (
+  path: string,
+  thunkName: string,
+  optimisticFunc: (payload: any, thunkAPI: any) => Promise<any>,
+  maxRetries = 5,
+  retryTime = 1000
+) => {
+  return createAsyncThunk(thunkName, async (payload: any, thunkAPI: any) => {
+    let retryCounter = 0;
+    const [sliceName, optimistObjectName] = path.split(".");
+    while (
+      thunkAPI.getState()[sliceName].optimisticLoads[optimistObjectName].start -
+        1 >
+      thunkAPI.getState()[sliceName].optimisticLoads[optimistObjectName].stop
+    ) {
+      if (retryCounter > maxRetries) {
+        return thunkAPI.rejectWithValue("Request time out");
+      }
+      retryCounter += 1;
+      await new Promise((resolve) => setTimeout(resolve, retryTime));
+    }
+    return await optimisticFunc(payload, thunkAPI);
+  });
+};
+
+export const optimisticCases = (
+  builder: any,
+  thunk: AsyncThunk<any, any, any>,
+  objectName: string
+) => {
+  builder.addCase(thunk.pending, (state: any, action: any) => {
+    const currentState = cloneDeep(current(state));
+    currentState.optimisticLoads[objectName].start += 1;
+    if (
+      currentState.optimisticLoads[objectName].start -
+        currentState.optimisticLoads[objectName].stop ===
+      1
+    ) {
+      currentState.prevStates[objectName] = cloneDeep(currentState[objectName]);
+
+      currentState[objectName] = merge(
+        currentState[objectName],
+        action.meta.arg
+      );
+    }
+    return currentState;
+  });
+  builder.addCase(thunk.fulfilled, (state: any, action: any) => {
+    const currentState = cloneDeep(current(state));
+    state[objectName] = merge(currentState[objectName], action.payload);
+    state.optimisticLoads[objectName].stop += 1;
+  });
+  builder.addCase(thunk.rejected, (state: any, action: any) => {
+    state.optimisticLoads[objectName].stop += 1;
+    state[objectName] = current(state).prevStates[objectName];
+  });
+};

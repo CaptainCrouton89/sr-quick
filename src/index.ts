@@ -10,6 +10,8 @@ import {
   isFulfilledAction,
   isPendingAction,
   isRejectedAction,
+  optimisticCases,
+  optimisticThunk,
   rejectIfError,
   withOptimisticState,
 } from "./slices/sliceUtils";
@@ -23,6 +25,8 @@ export {
   isFulfilledAction,
   isPendingAction,
   isRejectedAction,
+  optimisticCases,
+  optimisticThunk,
   rejectIfError,
   useEffectOnce,
   useForm,

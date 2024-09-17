@@ -1,9 +1,14 @@
 import axios from "axios";
+import { Color, debug } from "../utils/consoleColor";
 
 export const createAxios = (
   url: string,
   getToken: () => string,
-  onUnauthorized: (error: any) => void
+  onUnauthorized: (error: any) => void,
+  {
+    excludedLogs = [],
+    excludeAll = false,
+  }: { excludedLogs?: string[]; excludeAll?: boolean } = {}
 ) => {
   const mainAxios = axios.create({
     baseURL: url,
@@ -18,13 +23,22 @@ export const createAxios = (
         const authString = "Bearer " + token;
         newConfig.headers.Authorization = authString;
       }
-      console.debug(
-        newConfig.method +
-          " " +
-          newConfig.url +
-          " " +
-          (newConfig.data ? JSON.stringify(newConfig.data, null, 2) : "{}")
-      );
+      if (
+        newConfig.url &&
+        excludedLogs.includes(newConfig.url) &&
+        !excludeAll
+      ) {
+        debug(newConfig.method + " " + newConfig.url, Color.BLUE);
+      } else {
+        debug(
+          newConfig.method +
+            " " +
+            newConfig.url +
+            " " +
+            (newConfig.data ? JSON.stringify(newConfig.data, null, 2) : "{}"),
+          Color.BLUE
+        );
+      }
       config = newConfig;
       return newConfig;
     },
