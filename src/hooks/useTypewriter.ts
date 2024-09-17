@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 
-const useTypewriter = (text: string, speed = 100, initialDelay = 1000) => {
+export const useTypewriter = (
+  text: string,
+  speed = 100,
+  initialDelay = 1000
+) => {
   const [displayedText, setDisplayedText] = useState("");
   const [index, setIndex] = useState(0);
 
@@ -19,5 +23,3 @@ const useTypewriter = (text: string, speed = 100, initialDelay = 1000) => {
 
   return displayedText;
 };
-
-export default useTypewriter;
