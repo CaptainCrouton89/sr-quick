@@ -13,6 +13,6 @@ To install:
 
 To locally install this package in a project:
 
-1. open the npm project
+1. open the npm project you want to install this in
 2. `npm link sr-quick`
 3. done.
