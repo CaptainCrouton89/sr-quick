@@ -1,7 +1,6 @@
 // Purpose: create utility functions used by other slices
 import {
   CreateSliceOptions,
-  GetThunkAPI,
   PayloadAction,
   Slice,
   SliceCaseReducers,
@@ -28,7 +27,7 @@ export function isRejectedAction(sliceName: string) {
     action.type.startsWith(sliceName) && action.type.endsWith("/rejected");
 }
 
-export function rejectIfError(response: any, _: GetThunkAPI<any>) {
+export function rejectIfError(response: any) {
   if (response.failure) {
     throw JSON.stringify(response.error);
   }
