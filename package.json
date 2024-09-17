@@ -1,6 +1,6 @@
 {
   "name": "sr-quick",
-  "version": "1.1.01",
+  "version": "1.1.2",
   "description": "A collection of useful configurations and setups that make it more pleasant to spin up a react frontend quickly",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
