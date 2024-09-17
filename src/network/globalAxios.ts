@@ -1,16 +1,14 @@
 import axios from "axios";
 
-const mainAxios = axios.create({
-  timeout: 10000,
-});
-
 export const createAxios = (
   url: string,
   getToken: () => string,
   onUnauthorized: (error: any) => void
 ) => {
-  mainAxios.defaults.headers.common["Authorization"] = `Bearer ${getToken()}`;
-  mainAxios.defaults.baseURL = url;
+  const mainAxios = axios.create({
+    baseURL: url,
+    timeout: 10000,
+  });
 
   mainAxios.interceptors.request.use(
     (config) => {
@@ -38,33 +36,38 @@ export const createAxios = (
   mainAxios.interceptors.response.use(
     (response) => response.data,
     async (error) => {
-      const prettyError = {
-        message: error.message || "An error occurred",
-        request: {
-          method: error.config.method,
-          url: error.config.baseURL + error.config.url,
-          data: {},
-        },
-        response: {},
-      };
-      if (error.config.data) {
-        prettyError.request.data = error.config.data
-          .toString()
-          .replace(/"/g, "")
-          .replace(/,/g, ", ")
-          .replace(/:/g, ": ");
-      }
-      if (error.response) {
-        prettyError.response = {
-          status: error.response.status,
-          data: error.response.data,
+      try {
+        const prettyError = {
+          message: error.message || "An error occurred",
+          request: {
+            method: error.config.method,
+            url: error.config.baseURL + error.config.url,
+            data: {},
+          },
+          response: {},
         };
-        prettyError.message = error.response.data; // override message with server response if it exists
+        if (error.config.data) {
+          prettyError.request.data = error.config.data
+            .toString()
+            .replace(/"/g, "")
+            .replace(/,/g, ", ")
+            .replace(/:/g, ": ");
+        }
+        if (error.response) {
+          prettyError.response = {
+            status: error.response.status,
+            data: error.response.data,
+          };
+          prettyError.message = error.response.data; // override message with server response if it exists
+        }
+        if (error.response?.status === 401) {
+          onUnauthorized(error);
+        }
+        return { error: prettyError, failure: true };
+      } catch (e) {
+        console.log("Error handling error", e);
+        return error;
       }
-      if (error.response?.status === 401) {
-        onUnauthorized(error);
-      }
-      return { error: prettyError, failure: true };
     }
   );
   return mainAxios;
@@ -82,5 +85,3 @@ export interface AxiosError {
     data: string;
   };
 }
-
-export { mainAxios as axios };
