@@ -1,4 +1,4 @@
-import { useEffectOnce } from "./hooks/useEffectOnce";
+import { useEffectOnce, useEffectUntilTrue } from "./hooks/useEffectOnce";
 import { useForm } from "./hooks/useForm";
 import { useScrollPosition } from "./hooks/useScrollPosition";
 import { useTypewriter } from "./hooks/useTypewriter";
@@ -50,6 +50,7 @@ export {
   rejectIfError,
   success,
   useEffectOnce,
+  useEffectUntilTrue,
   useForm,
   useScrollPosition,
   useTypewriter,
